@@ -15,14 +15,14 @@ FoxScript syntax is pretty close to Python.
 
 ### Decorators
 ```python
-#Set the author name
-@author: FabulousFox
-#Set the MC Version
-@mc-version: 1.16.5
-#Set the project name(Name of the folder in the datapacks folder)
-@project-name: FoxScript_Test
-#Set the project description
-@project-description: This is a test!
+#Minecraft Version
+__project__["mc-version"]  = "1.16.5"
+#Name
+__project__["name"]        = "Fox"
+#Description
+__project__["description"] = "FoxScriptTest"
+#Author
+__project__["author"]      = "FabulousFox"
 ```
 
 ### Making a Function
@@ -62,4 +62,6 @@ Player("Steve").DemoBoard = 0
 #If-statements
 if Player("Steve").DemoBoard == Player("Alex").DemoBoard:
     say("Identical")
+if Player("Steve").DemoBoard == 2:
+    say("2")
 ```

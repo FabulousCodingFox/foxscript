@@ -35,3 +35,12 @@ class Namespace:
     def __load__():
         say("Executed on reload")
 ```
+
+# List of all syntax:
+```python
+#say
+say("text")
+
+#scoreboard objectives add scoreboardname scoreboardtype, the type is by default dummy
+scoreboard("scoreboardname","scoreboardtype")
+```

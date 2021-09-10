@@ -46,4 +46,7 @@ scoreboard("scoreboardname","scoreboardtype")
 
 #@a[name=Steve,x=0,dx=0,...], when only one argument is given, the player with that name will be targeted, the standard type is @a
 Player(type="@a",name="Steve")
+
+#scoreboard player set Steve DemoBoard 0
+Player("Steve").DemoBoard = 0
 ```

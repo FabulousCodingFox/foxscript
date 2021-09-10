@@ -3,7 +3,7 @@ A Python-based language compiled to MC Commands (Datapacks)
 
 # Progress
 - [ ] Loops
-- [ ] If statements
+- [X] If statements
 - [X] Namespaces
 - [X] Functions
 - [X] Tick

@@ -4,12 +4,11 @@ A Python-based language compiled to MC Commands (Datapacks)
 # Progress
 - [ ] Loops
 - [ ] If statements
-- [ ] Scoreboards
 - [X] Namespaces
 - [X] Functions
 - [X] Tick
 - [X] Load
-- [X] /say
+- [X] Scoreboards
 
 # How to use it
 FoxScript syntax is pretty close to Python.

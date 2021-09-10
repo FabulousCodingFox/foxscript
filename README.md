@@ -1,6 +1,9 @@
 # FoxScript
 A Python-based language compiled to MC Commands (Datapacks)
 
+# Progress
+- [] If-statements
+
 # How to use it
 FoxScript syntax is pretty close to Python.
 

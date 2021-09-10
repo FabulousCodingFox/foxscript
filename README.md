@@ -49,4 +49,8 @@ Player(type="@a",name="Steve")
 
 #scoreboard player set Steve DemoBoard 0
 Player("Steve").DemoBoard = 0
+
+#If-statements
+if Player("Steve").DemoBoard == Player("Alex").DemoBoard:
+    say("Identical")
 ```

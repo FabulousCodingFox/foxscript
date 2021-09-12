@@ -194,13 +194,18 @@ def compile_function(func):
     this=""
     for linenumber in range(len(func.code.split("\n"))):
         line = func.code.split("\n")[linenumber]
+        if "#" in line:line = func.code.split("\n")[linenumber].split("#")[0]
         if not line.startswith("    "):
             ##################################################################################################################################################
-            if line.strip().startswith("scoreboard("):
+            if line.strip().startswith("scoreboard(") or line.strip().startswith("setdisplay("):
                 try:
-                    def scoreboard(name="main",type="dummy",operation="add"):return "scoreboard objectives "+operation+" "+name+" "+type
+                    def scoreboard(name="main",type="dummy",operation="add"):
+                        return "scoreboard objectives "+operation+" "+name+" "+type
+                    def setdisplay(name="main",type="sidebar"):
+                        return "scoreboard objectives setdisplay "+type+" "+name
+                    
                     this = this + eval(line.strip()) + "\n"
-                except:error(line.strip(),linenumber,"Incorrect usage of scoreboard()")
+                except:error(line.strip(),linenumber,"Incorrect usage of scoreboard() or setdisplay()")
             ##################################################################################################################################################
             if line.strip().startswith("say("):
                 try:
@@ -215,38 +220,38 @@ def compile_function(func):
                             statements = line.strip().split("+=");statements = [i.strip() for i in statements];elements = statements[0].split(".");elements = [i.strip() for i in elements];elementsb = statements[1].split(".");elementsb = [i.strip() for i in elementsb]
                             if ifint(statements[1].strip()):this=this+"scoreboard players add "+str(eval(elements[0]))+" "+elements[1]+" "+statements[1].strip()+"\n"
                             else:this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" += "+str(eval(elementsb[0]))+" "+elementsb[1]+"\n"
-                        if "-=" in line.strip():
+                        elif "-=" in line.strip():
                             statements = line.strip().split("-=");statements = [i.strip() for i in statements];elements = statements[0].split(".");elements = [i.strip() for i in elements];elementsb = statements[1].split(".");elementsb = [i.strip() for i in elementsb]
                             if ifint(statements[1].strip()):this=this+"scoreboard players remove "+str(eval(elements[0]))+" "+elements[1]+" "+statements[1].strip()+"\n"
                             else:this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" -= "+str(eval(elementsb[0]))+" "+elementsb[1]+"\n"
-                        if "*=" in line.strip():
+                        elif "*=" in line.strip():
                             statements = line.strip().split("*=");statements = [i.strip() for i in statements];elements = statements[0].split(".");elements = [i.strip() for i in elements];elementsb = statements[1].split(".");elementsb = [i.strip() for i in elementsb]
                             if ifint(statements[1].strip()):this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" *= "+statements[1].strip()+" fs.math\n";f=open("output/"+pr["name"] +"/data/fsmain/functions/__load__.mcfunction","a");f.write("scoreboard players set "+statements[1].strip()+" fs.math "+statements[1].strip()+"\n");f.close()
                             else:this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" *= "+str(eval(elementsb[0]))+" "+elementsb[1]+"\n"
-                        if "/=" in line.strip():
+                        elif "/=" in line.strip():
                             statements = line.strip().split("/=");statements = [i.strip() for i in statements];elements = statements[0].split(".");elements = [i.strip() for i in elements];elementsb = statements[1].split(".");elementsb = [i.strip() for i in elementsb]
                             if ifint(statements[1].strip()):this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" /= "+statements[1].strip()+" fs.math\n";f=open("output/"+pr["name"] +"/data/fsmain/functions/__load__.mcfunction","a");f.write("scoreboard players set "+statements[1].strip()+" fs.math "+statements[1].strip()+"\n");f.close()
                             else:this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" /= "+str(eval(elementsb[0]))+" "+elementsb[1]+"\n"
-                        if "%=" in line.strip():
+                        elif "%=" in line.strip():
                             statements = line.strip().split("%=");statements = [i.strip() for i in statements];elements = statements[0].split(".");elements = [i.strip() for i in elements];elementsb = statements[1].split(".");elementsb = [i.strip() for i in elementsb]
                             if ifint(statements[1].strip()):this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" %= "+statements[1].strip()+" fs.math\n";f=open("output/"+pr["name"] +"/data/fsmain/functions/__load__.mcfunction","a");f.write("scoreboard players set "+statements[1].strip()+" fs.math "+statements[1].strip()+"\n");f.close()
                             else:this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" %= "+str(eval(elementsb[0]))+" "+elementsb[1]+"\n"
-                        if "=" in line.strip():
+                        elif "=" in line.strip():
                             statements = line.strip().split("=");statements = [i.strip() for i in statements];elements = statements[0].split(".");elements = [i.strip() for i in elements];elementsb = statements[1].split(".");elementsb = [i.strip() for i in elementsb]
                             if ifint(statements[1].strip()):this=this+"scoreboard players set "+str(eval(elements[0]))+" "+elements[1]+" "+statements[1].strip()+"\n"
                             else:this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" = "+str(eval(elementsb[0]))+" "+elementsb[1]+"\n"
-                        if ">" in line.strip():
-                            statements = line.strip().split(">");statements = [i.strip() for i in statements];elements = statements[0].split(".");elements = [i.strip() for i in elements];elementsb = statements[1].split(".");elementsb = [i.strip() for i in elementsb]
-                            if ifint(statements[1].strip()):this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" > "+statements[1].strip()+" fs.math\n";f=open("output/"+pr["name"] +"/data/fsmain/functions/__load__.mcfunction","a");f.write("scoreboard players set "+statements[1].strip()+" fs.math "+statements[1].strip()+"\n");f.close()
-                            else:this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" > "+str(eval(elementsb[0]))+" "+elementsb[1]+"\n"
-                        if "<" in line.strip():
-                            statements = line.strip().split("<");statements = [i.strip() for i in statements];elements = statements[0].split(".");elements = [i.strip() for i in elements];elementsb = statements[1].split(".");elementsb = [i.strip() for i in elementsb]
-                            if ifint(statements[1].strip()):this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" < "+statements[1].strip()+" fs.math\n";f=open("output/"+pr["name"] +"/data/fsmain/functions/__load__.mcfunction","a");f.write("scoreboard players set "+statements[1].strip()+" fs.math "+statements[1].strip()+"\n");f.close()
-                            else:this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" < "+str(eval(elementsb[0]))+" "+elementsb[1]+"\n"
-                        if "><" in line.strip():
+                        elif "><" in line.strip():
                             statements = line.strip().split("><");statements = [i.strip() for i in statements];elements = statements[0].split(".");elements = [i.strip() for i in elements];elementsb = statements[1].split(".");elementsb = [i.strip() for i in elementsb]
                             if ifint(statements[1].strip()):this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" >< "+statements[1].strip()+" fs.math\n";f=open("output/"+pr["name"] +"/data/fsmain/functions/__load__.mcfunction","a");f.write("scoreboard players set "+statements[1].strip()+" fs.math "+statements[1].strip()+"\n");f.close()
                             else:this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" >< "+str(eval(elementsb[0]))+" "+elementsb[1]+"\n"
+                        elif ">" in line.strip():
+                            statements = line.strip().split(">");statements = [i.strip() for i in statements];elements = statements[0].split(".");elements = [i.strip() for i in elements];elementsb = statements[1].split(".");elementsb = [i.strip() for i in elementsb]
+                            if ifint(statements[1].strip()):this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" > "+statements[1].strip()+" fs.math\n";f=open("output/"+pr["name"] +"/data/fsmain/functions/__load__.mcfunction","a");f.write("scoreboard players set "+statements[1].strip()+" fs.math "+statements[1].strip()+"\n");f.close()
+                            else:this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" > "+str(eval(elementsb[0]))+" "+elementsb[1]+"\n"
+                        elif "<" in line.strip():
+                            statements = line.strip().split("<");statements = [i.strip() for i in statements];elements = statements[0].split(".");elements = [i.strip() for i in elements];elementsb = statements[1].split(".");elementsb = [i.strip() for i in elementsb]
+                            if ifint(statements[1].strip()):this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" < "+statements[1].strip()+" fs.math\n";f=open("output/"+pr["name"] +"/data/fsmain/functions/__load__.mcfunction","a");f.write("scoreboard players set "+statements[1].strip()+" fs.math "+statements[1].strip()+"\n");f.close()
+                            else:this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" < "+str(eval(elementsb[0]))+" "+elementsb[1]+"\n"                        
             ##################################################################################################################################################IF
             if line.strip().startswith("if "):
                 def get_current_if():

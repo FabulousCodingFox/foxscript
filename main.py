@@ -72,7 +72,10 @@ class Entity:
     def __str__(self):
         return self.selector
 ##############################################################################################################################################################
-def error(line,linenumber,text):print("\nError in line "+str(linenumber)+":\nLine: "+str(line)+":\nText: "+str(text));exit()
+def error(line,linenumber,text):
+    print("\nError in line "+str(linenumber)+":\nLine: "+str(line)+":\nText: "+str(text))
+    input("Press enter to exit...")
+    exit()
 ##############################################################################################################################################################
 def ifint(zahl):
     s=str(zahl)
@@ -166,7 +169,6 @@ def generate_data_structures(code):
             namespaces.append(Namespace(name=namespacename,rawcode=this,path="output/" + pr["name"] + "/data/" + namespacename + "/functions/"))
     ##########################################################################################################################################################Getting Functions
     for namespace in namespaces:
-        print(namespace.name,":")
         for linenumber in range(len(namespace.rawcode.split("\n"))):
             line = namespace.rawcode.split("\n")[linenumber]
             this=""
@@ -184,13 +186,8 @@ def generate_data_structures(code):
                 if thisfunc.name =="__tick__":_tick_.append(thisfunc)
                 elif thisfunc.name =="__load__":_load_.append(thisfunc)
                 namespace.functions.append(thisfunc)
-                print("    ",[f.name for f in namespace.functions])
                 open(thisfunc.path,"x")
     ##########################################################################################################################################################
-    for namespace in namespaces:
-        print(namespace.name)
-        for f in namespace.functions:
-            print(f.name)
     return [pr,namespaces,_tick_,_load_]
 ##############################################################################################################################################################
 def compile_function(func):
@@ -314,9 +311,14 @@ def compile_function(func):
                 f=open(iffilepath,"x")
             ##################################################################################################################################################IF        
     return this
-import os,sys,time
+import os,sys,time,tkinter
+from tkinter import Tk
+from tkinter.filedialog import askopenfilename
+Tk().withdraw()
+filename = askopenfilename(title='Compile a file',initialdir=__file__,filetypes =[('FoxScript SourceCode', '*.fs')])
+print("Using file: ",filename)
 starttime=time.time()
-f=open("source.fs","r");code=str(f.read());f.close()
+f=open(filename,"r");code=str(f.read());f.close()
 print("Checking for Syntax errors...")
 c=check_for_syntax_error(code)
 print("Generating Data Structures(Pre-Compile)...")
@@ -333,14 +335,3 @@ for namespace in namespaces:
 f=open("output/" + pr["name"] + "/data/minecraft/tags/functions/tick.json","w");f.write("{\"values\":"+str(list([str(i.namespace.name+":"+i.name) for i in _tick_]))+"}");f.close()
 f=open("output/" + pr["name"] + "/data/minecraft/tags/functions/load.json","w");f.write("{\"values\":"+str(list([str(i.namespace.name+":"+i.name) for i in _load_]))+"}");f.close()
 print("Finished in",time.time()-starttime,"Seconds")
-
-
-
-
-
-
-
-
-
-
-

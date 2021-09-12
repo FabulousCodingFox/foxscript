@@ -8,17 +8,15 @@ class Function:
         self.namespace=namespace
 ##############################################################################################################################################################
 class Namespace:
-    def __init__(self, name="main", rawcode="", path="", functions=[]):
+    def __init__(self, name="main", rawcode="", path=""):
         self.name = name
-        self.functions = functions
+        self.functions = []
         self.path = path
         self.rawcode=rawcode
-    def add_function(self,function):
-        self.functions.append(function)
 ##############################################################################################################################################################
 class Player:
-    def __init__(self,name=None,type="@a",advancements=None,distance=None,dx=None,dy=None,dz=None,gamemode=None,level=None,limit=None,nbt=None,predicate=None,scores=None,sort=None,tag=None,team=None,x=None,x_rotation=None,y=None,y_rotation=None,z=None):
-        string=type+"["
+    def __init__(self,name=None,selector="@a",advancements=None,distance=None,dx=None,dy=None,dz=None,gamemode=None,level=None,limit=None,nbt=None,predicate=None,scores=None,sort=None,tag=None,team=None,x=None,x_rotation=None,y=None,y_rotation=None,z=None):
+        string=selector+"["
         if not advancements==None:string=string+"advancements="+str(advancements)+","
         if not distance==None:string=string+"distance="+str(distance)+","
         if not dx==None:string=string+"dx="+str(dx)+","
@@ -44,31 +42,46 @@ class Player:
         self.selector=string
     def __str__(self):
         return self.selector
+class Entity:
+    def __init__(self,type="player",selector="@e",advancements=None,distance=None,dx=None,dy=None,dz=None,name=None,gamemode=None,level=None,limit=None,nbt=None,predicate=None,scores=None,sort=None,tag=None,team=None,x=None,x_rotation=None,y=None,y_rotation=None,z=None):
+        string=selector+"["
+        if not advancements==None:string=string+"advancements="+str(advancements)+","
+        if not distance==None:string=string+"distance="+str(distance)+","
+        if not dx==None:string=string+"dx="+str(dx)+","
+        if not dy==None:string=string+"dy="+str(dy)+","
+        if not dz==None:string=string+"dz="+str(dz)+","
+        if not gamemode==None:string=string+"gamemode="+str(gamemode)+","
+        if not level==None:string=string+"level="+str(level)+","
+        if not limit==None:string=string+"limit="+str(limit)+","
+        if not name==None:string=string+"name="+str(name)+","
+        if not nbt==None:string=string+"nbt="+str(nbt)+","
+        if not predicate==None:string=string+"="+str(predicate)+","
+        if not scores==None:string=string+"="+str(scores)+","
+        if not sort==None:string=string+"="+str(sort)+","
+        if not tag==None:string=string+"tag="+str(tag)+","
+        if not team==None:string=string+"team="+str(team)+","
+        if not x==None:string=string+"x="+str(x)+","
+        if not x_rotation==None:string=string+"x_rotation="+str(x_rotation)+","
+        if not y==None:string=string+"y="+str(y)+","
+        if not y_rotation==None:string=string+"y_rotation="+str(y_rotation)+","
+        if not z==None:string=string+"z="+str(z)+","
+        if not type==None:string=string+"type="+str(type)+","
+        if string[-1]!="[":string=string[:-1]+"]"
+        else:string=string[:-1]
+        self.selector=string
+    def __str__(self):
+        return self.selector
 ##############################################################################################################################################################
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def error(line,linenumber,text):global err;print("\nError in line "+str(linenumber)+":\nLine: "+str(line)+":\nText: "+str(text));err=True
-
-import os,sys,time
+def error(line,linenumber,text):print("\nError in line "+str(linenumber)+":\nLine: "+str(line)+":\nText: "+str(text));exit()
+##############################################################################################################################################################
+def ifint(zahl):
+    s=str(zahl)
+    try:int(zahl);return True
+    except:
+        for char in s:
+            if not char in "1234567890.":return False
+        return True          
+##############################################################################################################################################################
 def check_for_syntax_error(code):
     err=False
     ##########################################################################################################################################################Removing Empty lines
@@ -102,8 +115,6 @@ def check_for_syntax_error(code):
 
 
 def generate_data_structures(code):
-    _tick_ = []
-    _load_ = []
     ##########################################################################################################################################################Reading Project Data
     pr={"name":None,"mc-version":None,"description":None,"author":None}
     for linenumber in range(len(code.rstrip().split("\n"))):
@@ -132,9 +143,14 @@ def generate_data_structures(code):
     os.mkdir("output/" + pr["name"] + "/data/minecraft/tags/functions")
     open("output/" + pr["name"] + "/data/minecraft/tags/functions/tick.json","x")
     open("output/" + pr["name"] + "/data/minecraft/tags/functions/load.json","x")
+    os.mkdir("output/" + pr["name"] + "/data/fsmain")
+    os.mkdir("output/" + pr["name"] + "/data/fsmain/functions")
+    namespaces = [Namespace(name="fsmain",rawcode="def __load__():\n    scoreboard(\"fs.math\")\n",path="output/" + pr["name"] + "/data/fsmain/")]
+    _tick_ = []
+    _load_ = [Function("scoreboard(\"fs.math\")\n","","output/" + pr["name"] +     "/data/fsmain/functions/__load__.mcfunction","__load__",namespaces[-1])]
+    namespaces[-1].functions.append(_load_[-1])
     ##########################################################################################################################################################Getting Namespaces
-    namespaces = []
-    for linenumber in range(len(code.rstrip().split("\n"))):
+    for linenumber in range(len(code.split("\n"))):
         line = code.split("\n")[linenumber]
         this=""
         if line.startswith("class "):
@@ -145,11 +161,13 @@ def generate_data_structures(code):
                 looplinenumber+=1
                 loopline = code.split("\n")[looplinenumber]
                 if loopline.startswith("    "):this = this + loopline[4:] + "\n"
-            os.mkdir("output/" + pr["name"] + "/data/" + name)
-            namespaces.append(Namespace(name=namespacename,rawcode=this,path="output/" + pr["name"] + "/data/" + name + "/"))
+            os.mkdir("output/" + pr["name"] + "/data/" + namespacename)
+            os.mkdir("output/" + pr["name"] + "/data/" + namespacename + "/functions")
+            namespaces.append(Namespace(name=namespacename,rawcode=this,path="output/" + pr["name"] + "/data/" + namespacename + "/functions/"))
     ##########################################################################################################################################################Getting Functions
     for namespace in namespaces:
-        for linenumber in range(len(namespace.rawcode.rstrip().split("\n"))):
+        print(namespace.name,":")
+        for linenumber in range(len(namespace.rawcode.split("\n"))):
             line = namespace.rawcode.split("\n")[linenumber]
             this=""
             if line.startswith("def "):
@@ -159,23 +177,26 @@ def generate_data_structures(code):
                 while loopline.startswith("    "):
                     looplinenumber+=1
                     loopline = namespace.rawcode.split("\n")[looplinenumber]
-                    if loopline.startswith("    "):this = this + loopline[4:] + "\n"
-                    
+                    if loopline.startswith("    "):
+                        this = this + loopline[4:] + "\n"
+
                 thisfunc=Function(this,"",namespace.path+funcname+".mcfunction",funcname,namespace)
                 if thisfunc.name =="__tick__":_tick_.append(thisfunc)
                 elif thisfunc.name =="__load__":_load_.append(thisfunc)
-                namespace.add_function(thisfunc)
+                namespace.functions.append(thisfunc)
+                print("    ",[f.name for f in namespace.functions])
                 open(thisfunc.path,"x")
     ##########################################################################################################################################################
-    return pr,namespaces,_tick_,_load_
-
-
-
+    for namespace in namespaces:
+        print(namespace.name)
+        for f in namespace.functions:
+            print(f.name)
+    return [pr,namespaces,_tick_,_load_]
+##############################################################################################################################################################
 def compile_function(func):
     this=""
-    for linenumber in range(len(func.code.rstrip().split("\n"))):
+    for linenumber in range(len(func.code.split("\n"))):
         line = func.code.split("\n")[linenumber]
-
         if not line.startswith("    "):
             ##################################################################################################################################################
             if line.strip().startswith("scoreboard("):
@@ -189,10 +210,49 @@ def compile_function(func):
                     def say(text):return "say "+str(text)
                     this = this + eval(line.strip()) + "\n"
                 except:error(line.strip(),linenumber,"Incorrect usage of say()")
+            ##################################################################################################################################################
+            if not "if" in line.strip():
+                if "Player(" in line.strip() or "Entity(" in line.strip():
+                    if "=" in line.strip():
+                        if "+=" in line.strip():
+                            statements = line.strip().split("+=");statements = [i.strip() for i in statements];elements = statements[0].split(".");elements = [i.strip() for i in elements];elementsb = statements[1].split(".");elementsb = [i.strip() for i in elementsb]
+                            if ifint(statements[1].strip()):this=this+"scoreboard players add "+str(eval(elements[0]))+" "+elements[1]+" "+statements[1].strip()+"\n"
+                            else:this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" += "+str(eval(elementsb[0]))+" "+elementsb[1]+"\n"
+                        if "-=" in line.strip():
+                            statements = line.strip().split("-=");statements = [i.strip() for i in statements];elements = statements[0].split(".");elements = [i.strip() for i in elements];elementsb = statements[1].split(".");elementsb = [i.strip() for i in elementsb]
+                            if ifint(statements[1].strip()):this=this+"scoreboard players remove "+str(eval(elements[0]))+" "+elements[1]+" "+statements[1].strip()+"\n"
+                            else:this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" -= "+str(eval(elementsb[0]))+" "+elementsb[1]+"\n"
+                        if "*=" in line.strip():
+                            statements = line.strip().split("*=");statements = [i.strip() for i in statements];elements = statements[0].split(".");elements = [i.strip() for i in elements];elementsb = statements[1].split(".");elementsb = [i.strip() for i in elementsb]
+                            if ifint(statements[1].strip()):this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" *= "+statements[1].strip()+" fs.math\n";f=open("output/"+pr["name"] +"/data/fsmain/functions/__load__.mcfunction","a");f.write("scoreboard players set "+statements[1].strip()+" fs.math "+statements[1].strip()+"\n");f.close()
+                            else:this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" *= "+str(eval(elementsb[0]))+" "+elementsb[1]+"\n"
+                        if "/=" in line.strip():
+                            statements = line.strip().split("/=");statements = [i.strip() for i in statements];elements = statements[0].split(".");elements = [i.strip() for i in elements];elementsb = statements[1].split(".");elementsb = [i.strip() for i in elementsb]
+                            if ifint(statements[1].strip()):this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" /= "+statements[1].strip()+" fs.math\n";f=open("output/"+pr["name"] +"/data/fsmain/functions/__load__.mcfunction","a");f.write("scoreboard players set "+statements[1].strip()+" fs.math "+statements[1].strip()+"\n");f.close()
+                            else:this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" /= "+str(eval(elementsb[0]))+" "+elementsb[1]+"\n"
+                        if "%=" in line.strip():
+                            statements = line.strip().split("%=");statements = [i.strip() for i in statements];elements = statements[0].split(".");elements = [i.strip() for i in elements];elementsb = statements[1].split(".");elementsb = [i.strip() for i in elementsb]
+                            if ifint(statements[1].strip()):this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" %= "+statements[1].strip()+" fs.math\n";f=open("output/"+pr["name"] +"/data/fsmain/functions/__load__.mcfunction","a");f.write("scoreboard players set "+statements[1].strip()+" fs.math "+statements[1].strip()+"\n");f.close()
+                            else:this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" %= "+str(eval(elementsb[0]))+" "+elementsb[1]+"\n"
+                        if "=" in line.strip():
+                            statements = line.strip().split("=");statements = [i.strip() for i in statements];elements = statements[0].split(".");elements = [i.strip() for i in elements];elementsb = statements[1].split(".");elementsb = [i.strip() for i in elementsb]
+                            if ifint(statements[1].strip()):this=this+"scoreboard players set "+str(eval(elements[0]))+" "+elements[1]+" "+statements[1].strip()+"\n"
+                            else:this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" = "+str(eval(elementsb[0]))+" "+elementsb[1]+"\n"
+                        if ">" in line.strip():
+                            statements = line.strip().split(">");statements = [i.strip() for i in statements];elements = statements[0].split(".");elements = [i.strip() for i in elements];elementsb = statements[1].split(".");elementsb = [i.strip() for i in elementsb]
+                            if ifint(statements[1].strip()):this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" > "+statements[1].strip()+" fs.math\n";f=open("output/"+pr["name"] +"/data/fsmain/functions/__load__.mcfunction","a");f.write("scoreboard players set "+statements[1].strip()+" fs.math "+statements[1].strip()+"\n");f.close()
+                            else:this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" > "+str(eval(elementsb[0]))+" "+elementsb[1]+"\n"
+                        if "<" in line.strip():
+                            statements = line.strip().split("<");statements = [i.strip() for i in statements];elements = statements[0].split(".");elements = [i.strip() for i in elements];elementsb = statements[1].split(".");elementsb = [i.strip() for i in elementsb]
+                            if ifint(statements[1].strip()):this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" < "+statements[1].strip()+" fs.math\n";f=open("output/"+pr["name"] +"/data/fsmain/functions/__load__.mcfunction","a");f.write("scoreboard players set "+statements[1].strip()+" fs.math "+statements[1].strip()+"\n");f.close()
+                            else:this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" < "+str(eval(elementsb[0]))+" "+elementsb[1]+"\n"
+                        if "><" in line.strip():
+                            statements = line.strip().split("><");statements = [i.strip() for i in statements];elements = statements[0].split(".");elements = [i.strip() for i in elements];elementsb = statements[1].split(".");elementsb = [i.strip() for i in elementsb]
+                            if ifint(statements[1].strip()):this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" >< "+statements[1].strip()+" fs.math\n";f=open("output/"+pr["name"] +"/data/fsmain/functions/__load__.mcfunction","a");f.write("scoreboard players set "+statements[1].strip()+" fs.math "+statements[1].strip()+"\n");f.close()
+                            else:this=this+"scoreboard players operation "+str(eval(elements[0]))+" "+elements[1]+" >< "+str(eval(elementsb[0]))+" "+elementsb[1]+"\n"
             ##################################################################################################################################################IF
             if line.strip().startswith("if "):
                 def get_current_if():
-                    lambda w:w.translate(dict(zip(s,s[::-1])))
                     files=os.listdir(func.namespace.path);highest="if_";s=False
                     for i in files:
                         if "if_" in i:s=True
@@ -201,6 +261,7 @@ def compile_function(func):
                         if "if_" in i and i>highest:highest=i
                     if highest!="if_.mcfunction":
                         letters=i[3]
+                        lettersn=0
                         if letters=="":lettersn=0
                         if letters=="a":lettersn=1
                         if letters=="b":lettersn=2
@@ -213,13 +274,15 @@ def compile_function(func):
                         if letters=="j":lettersn=9
                         if letters=="k":lettersn=10
                         return "if_"+["a","b","c","d","e","f","g","h","i","j","k"][lettersn+1]
-                    else:
-                        return "if_a"
-                            
+                    else:return "if_a"        
                 iffilepath = func.namespace.path+get_current_if()+".mcfunction"
                 iffunctionpath = func.namespace.name+":"+get_current_if()
-                if "==" in line.strip():
-                    statements=line.strip().split("==")
+                if "==" in line.strip() or "<" in line.strip() or "<=" in line.strip() or ">" in line.strip() or ">=" in line.strip():
+                    if "==" in line.strip():statements=line.strip().split("==")
+                    elif "<" in line.strip():statements=line.strip().split("<")
+                    elif "<=" in line.strip():statements=line.strip().split("<=")
+                    elif ">" in line.strip():statements=line.strip().split(">")
+                    elif ">=" in line.strip():statements=line.strip().split(">=")
                     statements=[statements[0].replace("if ","").strip(),statements[1][:-1].strip()]
                     try:int(statements[0]);statements.append(True)
                     except:statements.append(False)
@@ -227,54 +290,57 @@ def compile_function(func):
                     except:statements.append(False)
                     if statements[2]==True and statements[3] ==True: error(line.strip(),linenumber,"No two numbers in an if statement!")
                     if statements[2]==True and statements[3]==False: statements=[statements[1],statements[0],statements[3],statements[2]]
-                    
-                    if "Player(" in statements[0]:
+                    if "Player(" in statements[0] or "Entity(" in statements[0]:
                         elements=statements[0].split(".");elements=[i.strip() for i in elements]
                         if not elements[1] in ["nbt"]:
                             this = this + "execute if score "+str(eval(elements[0]))+" "+str(elements[1])+" "
-                            if statements[3] == True:
-                               this = this + "matches "+statements[1]+" run function "+iffunctionpath+"\n"
-
-
-                looplinenumber=linenumber;loopline="    ";this=""
+                            if statements[3] == True:this = this + "matches "+statements[1]+" run function "+iffunctionpath+"\n"
+                            else:
+                                elements=statements[1].split(".");elements=[i.strip() for i in elements]
+                                if "==" in line.strip():this = this + "= "+ str(eval(elements[0]))+" "+str(elements[1])+" run function "+iffunctionpath+"\n"
+                                if ">=" in line.strip():this = this + ">= "+str(eval(elements[0]))+" "+str(elements[1])+" run function "+iffunctionpath+"\n"
+                                if "<=" in line.strip():this = this + "<= "+str(eval(elements[0]))+" "+str(elements[1])+" run function "+iffunctionpath+"\n"
+                                if "<" in line.strip(): this = this + "< "+ str(eval(elements[0]))+" "+str(elements[1])+" run function "+iffunctionpath+"\n"
+                                if ">" in line.strip(): this = this + "> "+ str(eval(elements[0]))+" "+str(elements[1])+" run function "+iffunctionpath+"\n"
+                    else:error(line.strip(),linenumber,"Incorrect line")
+                looplinenumber=linenumber;loopline="    ";ithis=""
                 while loopline.startswith("    "):
-                    looplinenumber+=1;loopline = func.code.split("\n")[looplinenumber]
-                    if loopline.startswith("    "):this = this + loopline[4:] + "\n"
-
-                thisf=Function(this,"",iffilepath,get_current_if(),func.namespace)
-                func.namespace.add_function(thisf)
-                open(iffilepath,"x")
-                compile_function(thisf)
-            ##################################################################################################################################################IF
-
-                    
-
-                    
-        
+                    looplinenumber+=1
+                    loopline = func.code.split("\n")[looplinenumber]
+                    if loopline.startswith("    "):
+                        ithis = ithis + loopline[4:] + "\n"
+                thisf=Function(ithis,"",iffilepath,get_current_if(),func.namespace)
+                func.namespace.functions.append(thisf)
+                f=open(iffilepath,"x")
+            ##################################################################################################################################################IF        
     return this
-
-
-
-
-      
+import os,sys,time
 starttime=time.time()
-
 f=open("source.fs","r");code=str(f.read());f.close()
-
 print("Checking for Syntax errors...")
 c=check_for_syntax_error(code)
 print("Generating Data Structures(Pre-Compile)...")
 pr,namespaces,_tick_,_load_=generate_data_structures(c)
-
-
-def function_to_mcpath(func):return func.namespace.name+":"+func.name
+print("Compiling...")
 for namespace in namespaces:
+    print(namespace.functions)
     for function in namespace.functions:
         this=compile_function(function)
         function.mccode=this
-        f=open(function.path,"w");f.write(this);f.close()
+        f=open(function.path,"w")
+        f.write(this)
+        f.close()
 f=open("output/" + pr["name"] + "/data/minecraft/tags/functions/tick.json","w");f.write("{\"values\":"+str(list([str(i.namespace.name+":"+i.name) for i in _tick_]))+"}");f.close()
 f=open("output/" + pr["name"] + "/data/minecraft/tags/functions/load.json","w");f.write("{\"values\":"+str(list([str(i.namespace.name+":"+i.name) for i in _load_]))+"}");f.close()
-
-
 print("Finished in",time.time()-starttime,"Seconds")
+
+
+
+
+
+
+
+
+
+
+

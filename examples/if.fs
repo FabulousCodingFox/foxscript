@@ -1,6 +1,6 @@
 __project__["mc-version"]  = "1.16.5"
 __project__["name"]        = "if"
-__project__["description"] = ""
+__project__["description"] = "A Demo"
 __project__["author"]      = "FabulousFox"
 
 class if: 

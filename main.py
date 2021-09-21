@@ -71,6 +71,11 @@ class Entity:
         self.selector=string
     def __str__(self):
         return self.selector
+class Var:
+    def __init__(self,name):
+        self.selector=name
+    def __str__(self):
+        return self.selector
 ##############################################################################################################################################################
 def error(line,linenumber,text):
     print("\nError in line "+str(linenumber)+":\nLine: "+str(line)+":\nText: "+str(text))
@@ -213,8 +218,15 @@ def compile_function(func):
                     this = this + eval(line.strip()) + "\n"
                 except:error(line.strip(),linenumber,"Incorrect usage of say()")
             ##################################################################################################################################################
+            if line.strip().startswith("function("):
+                try:
+                    def function(namespace,path):return "function "+namespace+":"+path
+                    this = this + eval(line.strip())+"\n"
+                except:error(line.strip(),linenumber,"Incorrect usage of function()")
+            
+
             if not "if" in line.strip():
-                if "Player(" in line.strip() or "Entity(" in line.strip():
+                if "Player(" in line.strip() or "Entity(" in line.strip() or "Var(" in line.strip():
                     if "=" in line.strip():
                         if "+=" in line.strip():
                             statements = line.strip().split("+=");statements = [i.strip() for i in statements];elements = statements[0].split(".");elements = [i.strip() for i in elements];elementsb = statements[1].split(".");elementsb = [i.strip() for i in elementsb]
@@ -275,7 +287,13 @@ def compile_function(func):
                         if letters=="h":lettersn=8
                         if letters=="j":lettersn=9
                         if letters=="k":lettersn=10
-                        return "if_"+["a","b","c","d","e","f","g","h","i","j","k"][lettersn+1]
+                        if letters=="l":lettersn=11
+                        if letters=="m":lettersn=12
+                        if letters=="n":lettersn=13
+                        if letters=="o":lettersn=14
+                        if letters=="p":lettersn=15
+                        if letters=="q":lettersn=16
+                        return "if_"+["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q"][lettersn+1]
                     else:return "if_a"        
                 iffilepath = func.namespace.path+get_current_if()+".mcfunction"
                 iffunctionpath = func.namespace.name+":"+get_current_if()
@@ -292,7 +310,7 @@ def compile_function(func):
                     except:statements.append(False)
                     if statements[2]==True and statements[3] ==True: error(line.strip(),linenumber,"No two numbers in an if statement!")
                     if statements[2]==True and statements[3]==False: statements=[statements[1],statements[0],statements[3],statements[2]]
-                    if "Player(" in statements[0] or "Entity(" in statements[0]:
+                    if "Player(" in statements[0] or "Entity(" in statements[0] or "Var(" in statements[0]:
                         elements=statements[0].split(".");elements=[i.strip() for i in elements]
                         if not elements[1] in ["nbt"]:
                             this = this + "execute if score "+str(eval(elements[0]))+" "+str(elements[1])+" "
@@ -315,7 +333,8 @@ def compile_function(func):
                 func.namespace.functions.append(thisf)
                 f=open(iffilepath,"x")
             ##################################################################################################################################################IF        
-    return this
+    return this                                        
+                                             
 import os,sys,time,tkinter
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename
